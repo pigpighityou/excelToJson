@@ -24,6 +24,6 @@
 
 ### 目前自己访问的步骤（因为未部署到前端框架）
 * 1.下载代码
-* 2.安装依赖 => npm || yarn
-* 3.启动服务=>npm run dev||yarn dev
+* 2.安装依赖 => npm  ||  yarn
+* 3.启动服务=>npm run dev  ||  yarn dev
 * 4.访问 http://localhost:7002
