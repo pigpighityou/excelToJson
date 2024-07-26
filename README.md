@@ -15,6 +15,9 @@
 * js(cjs)
 
 
-### 在http://127.0.0.1:7002/upload-dir里千万不要传内容过大的文件夹，诸如包含图片 视频的文件 最好 传的一个文件夹，里面的格式只有[".pdf", ".json", ".log", "xlsx", "xls", "csv",'docx','doc','png','webp','jpg']等，然后会帮你自动识别里面的表格 从而进行转换json。
+* 不允许传内容过大的文件夹，里面的格式最好只有
+```
+[".pdf", ".json", ".log", "xlsx", "xls", "csv",'docx','doc','png','webp','jpg']
+```
 
 ### 有待完善
