@@ -1,0 +1,22 @@
+
+
+.back{
+
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 200px;
+    text-align: center;
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.back:hover{
+    background-color: #f1f1f1;
+    color: #000;
+    border-radius: 5px;
+    padding: 5px;
+    letter-spacing: 1px;
+}

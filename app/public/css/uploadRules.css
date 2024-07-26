@@ -1,0 +1,48 @@
+@import url('/public/css/index.css');
+
+.header{
+    background-color: #f1f1f1;
+    padding: 20px;
+    text-align: center;
+    font-size: 35px;
+    color: #000;
+    font-weight: bold;
+    border-bottom: 1px solid #000;
+    margin-bottom: 20px;
+}
+
+.rules{
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+
+.switchUrl{
+    display: flex;
+    justify-content:space-around;
+    margin-top: 100px;
+    /*  边框阴影装饰 */
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #000;
+    
+
+ 
+}
+
+a{
+    text-decoration: none;
+    color: #000;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+a:hover{
+    color: #f1f1f1;
+    background-color: #000;
+    border-radius: 5px;
+    padding: 5px;
+    letter-spacing: 1px;
+}
+

@@ -1,0 +1,27 @@
+#drop-area {
+    border: 2px dashed #007bff;
+    border-radius: 5px;
+    margin-top: 50px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    cursor: pointer; /* 添加鼠标指针样式 */
+  }
+  .file-icon {
+    font-size: 50px;
+    color: #007bff;
+  }
+  .table {
+    margin-top: 10px;
+  }
+
+  .toast-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    top: 50px; /* 调整到合适的垂直位置 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050; /* 保证在顶部显示 */
+  }

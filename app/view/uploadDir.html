@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文件夹上传示例</title>
+    <link rel="stylesheet" type="text/css" href="/public/css/uploadDir.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <!-- Bootstrap 加载弹出框 -->
+    <div class="modal" id="loadingModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">正在上传中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container">
+      <!-- 成功提示框 -->
+      <div
+        id="successToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-success text-white">
+          <strong class="me-auto">成功</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">文件夹上传成功！</div>
+      </div>
+
+      <!-- 失败提示框 -->
+      <div
+        id="errorToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">失败</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">文件夹上传失败，请重试。</div>
+      </div>
+      <div
+        id="overloadToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">失败</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">文件太大，请重试。</div>
+      </div>
+      <div
+        id="noDataToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">失败</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">未传递文件，请重试。</div>
+      </div>
+      <div
+        id="invalidDataToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">失败</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">目录里没有表格，请重试。</div>
+      </div>
+      <div
+        id="blankToast"
+        class="toast justify-content-center"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header bg-danger text-white">
+          <strong class="me-auto">失败</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="关闭"
+          ></button>
+        </div>
+        <div class="toast-body">请上传内容。</div>
+      </div>
+    </div>
+    <div class="container">
+      <div
+        id="drop-area"
+        ondragover="event.preventDefault()"
+        ondrop="handleDrop(event)"
+      >
+        <p>请拖拽文件夹到此区域或点击选择文件夹</p>
+        <input
+          type="file"
+          id="fileInput"
+          webkitdirectory
+          directory
+          style="display: none"
+        />
+        <!-- 只允许上传文件夹 -->
+        <!-- 使用Bootstrap按钮样式 -->
+        <label for="fileInput" class="btn btn-primary mt-2">选择文件夹</label>
+      </div>
+      <div class="mt-3">
+        <table class="table table-bordered text-center">
+          <thead class="table-primary">
+            <tr>
+              <th>文件夹名称</th>
+              <th>上传状态</th>
+              <th>文件夹大小</th>
+            </tr>
+          </thead>
+          <tbody id="fileList"></tbody>
+        </table>
+      </div>
+      <div class="download-container"></div>
+      <!-- 使用Bootstrap按钮样式 -->
+      <button class="btn btn-success mt-3" onclick="uploadFolder()">
+        开始上传文件夹
+      </button>
+
+      <button id="downloadButton" class="btn btn-success mt-3" type="button">
+        下载 json
+      </button>
+    </div>
+
+    <%- include ('back.html') %>
+
+    <!-- 脚本部分 -->
+    <script>
+      // 点击下载按钮时postcompressAndDownload路由，获取data里的url，然后下载
+      document
+        .getElementById("downloadButton")
+        .addEventListener("click", async function () {
+          if (document.getElementById("fileList").children.length === 0) {
+            // 显示失败提示框
+            const errorToast = new bootstrap.Toast(
+              document.getElementById("blankToast")
+            );
+            errorToast.show();
+            return;
+          }
+          try {
+            const response = await axios.post("/download-json-zip");
+            const url = response.data.data.zipPath;
+            const blobRes = await axios({
+              url,
+              method: "GET",
+              responseType: "blob",
+            });
+            /* console.log(blobRes); */
+            const blob = new Blob([blobRes.data], { type: "application/zip" });
+            /* console.log(blob); */
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "json_files.zip";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+      // 显示加载弹出框
+      const loadingModal = new bootstrap.Modal(
+        document.getElementById("loadingModal")
+      );
+
+      //使用axios发送文件夹数据到后端请求加载时显示加载弹出框
+      axios.interceptors.request.use(
+        (config) => {
+          return config;
+        },
+        (error) => {
+          // 隐藏加载弹出框
+          loadingModal.hide();
+          return Promise.reject(error);
+        }
+      );
+
+      // 使用 Axios 发送文件夹数据到后端
+      axios.interceptors.response.use(
+        (response) => {
+          // 隐藏加载弹出框
+          loadingModal.hide();
+          return response;
+        },
+        (error) => {
+          // 隐藏加载弹出框
+          loadingModal.hide();
+          return Promise.reject(error);
+        }
+      );
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (event) {
+          handleFiles(event.target.files);
+        });
+
+      document
+        .getElementById("drop-area")
+        .addEventListener("drop", function (event) {
+          event.preventDefault();
+          handleFiles(event.dataTransfer.files);
+        });
+
+      function handleFiles(files) {
+        const fileList = document.getElementById("fileList");
+        fileList.innerHTML = "";
+        if (files.length >= 0) {
+          const file = files[0]; // 处理第一个文件获取文件的文件夹名称
+
+          // 创建表格行
+          const row = document.createElement("tr");
+
+          // 创建文件夹名称单元格
+          const folderNameCell = document.createElement("td");
+          folderNameCell.textContent =
+            file.webkitRelativePath == ""
+              ? file.name
+              : file.webkitRelativePath.split("/")[0]; // 获取文件夹名称
+          row.appendChild(folderNameCell);
+
+          // 创建文件夹大小单元格
+          const statusCell = document.createElement("td");
+          statusCell.textContent = "未上传"; // 初始状态为未上传
+          row.appendChild(statusCell);
+
+          // 创建文件夹大小单元格
+          const sizeCell = document.createElement("td");
+          sizeCell.textContent = "/"; // 文件夹大小
+          row.appendChild(sizeCell);
+
+          // 添加整行到表格
+          fileList.appendChild(row);
+        }
+      }
+
+      async function uploadFolder() {
+        const input = document.getElementById("fileInput");
+        const files = input.files;
+        if (files.length > 0) {
+          const formData = new FormData();
+
+          // 显示加载弹出框
+          loadingModal.show();
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // 如果是苹果电脑的隐藏文件则跳过，不然会报错
+            if (file.name === ".DS_Store") {
+              continue; // 忽略 .DS_Store 文件
+            }
+
+            formData.append("file" + (i + 1), file);
+
+          }
+            try {
+              const response = await axios({
+                method: "POST",
+                url: "/upload-dir",
+                data: formData,
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              });
+              // 如果按钮被隐藏，则显示按钮
+              if (
+                (document.getElementById("downloadButton").style.visibility =
+                  "hidden")
+              ) {
+                document.getElementById("downloadButton").style.visibility =
+                  "visible";
+              }
+              //  告知上传状态为成功
+              const successToast = new bootstrap.Toast(
+                document.getElementById("successToast")
+              );
+              successToast.show();
+              // 更新上传状态为成功
+              const rows = document.querySelectorAll("#fileList tr");
+              rows.forEach((row) => {
+                const statusCell = row.querySelector("td:nth-child(2)");
+                statusCell.textContent = "上传成功";
+                const sizeCell = row.querySelector("td:nth-child(3)");
+                sizeCell.textContent = response.data.data.totalSize + "KB";
+              });
+             /*  console.log(response.data); */ // 可以处理后端返回的数据
+            } catch (error) {
+              //  如果状态码为413，则提示文件太大
+              if (error.response.status === 413) {
+                const overloadToast = new bootstrap.Toast(
+                  document.getElementById("overloadToast")
+                );
+                overloadToast.show();
+              } else if (error.response.status === 400) {
+                const invalidDataToast = new bootstrap.Toast(
+                  document.getElementById("invalidDataToast")
+                );
+                invalidDataToast.show();
+              } else {
+                // 显示失败提示框
+                const errorToast = new bootstrap.Toast(
+                  document.getElementById("errorToast")
+                );
+                errorToast.show();
+              }
+              // 更新上传状态为失败
+              const rows = document.querySelectorAll("#fileList tr");
+              rows.forEach((row) => {
+                const statusCell = row.querySelector("td:nth-child(2)");
+                statusCell.textContent = "上传失败";
+              });
+              // 将下载json按钮给隐藏
+              document.getElementById("downloadButton").style.visibility =
+                "hidden";
+              console.error(error);
+            }
+          
+          loadingModal.hide();
+        } else {
+          const noDataToast = new bootstrap.Toast(
+            document.getElementById("noDataToast")
+          );
+          noDataToast.show();
+        }
+      }
+
+      function handleDrop(event) {
+        event.preventDefault();
+        handleFiles(event.dataTransfer.files);
+      }
+    </script>
+  </body>
+</html>
