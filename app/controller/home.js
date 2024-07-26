@@ -10,6 +10,11 @@ class HomeController extends Controller {
     await ctx.render("upload.html");
   }
 
+  async uploadDir() {
+    const { ctx } = this;
+    await ctx.render("uploadDir.html");
+  }
+
   async uploadPost() {
     const { ctx, app } = this;
     const res = ctx.request.files[0];
@@ -36,11 +41,6 @@ class HomeController extends Controller {
     };
   }
 
-  async uploadDir() {
-    const { ctx } = this;
-    await ctx.render("uploadDir.html");
-  }
-
   async uploadDirPost() {
     const { ctx, app } = this;
     const parts = ctx.multipart();
@@ -57,7 +57,7 @@ class HomeController extends Controller {
     while ((part = await parts()) != null) {
       if (part.length) {
         // 这是 busboy 的字段
-   /*      console.log("field: " + part[0]);
+        /*      console.log("field: " + part[0]);
         console.log("value: " + part[1]);
         console.log("valueTruncated: " + part[2]);
         console.log("fieldnameTruncated: " + part[3]); */
@@ -90,7 +90,6 @@ class HomeController extends Controller {
           throw err;
         }
       }
-
     }
 
     // 计算文件夹大小
@@ -105,7 +104,6 @@ class HomeController extends Controller {
     // 对所有表格文件进行处理，将他们转换为json
     const r = app.transExcelToJson(excelFiles);
 
-
     // 返回消息
     ctx.body = {
       status: 200,
@@ -115,7 +113,6 @@ class HomeController extends Controller {
       },
     };
     // 需要使得计数完成后再进行excel数组大小的检查
-
 
     // json文件夹传输给前端,如果没有则证明没有表格
     if (r.length === 0) {
@@ -138,6 +135,7 @@ class HomeController extends Controller {
       },
     };
   }
+  
 }
 
 module.exports = HomeController;
